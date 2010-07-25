@@ -1,12 +1,12 @@
 use strict;
 use Plack::App::File;
-use Plack::Middleware::Highlighter;
+use HTML::Highlighter;
 use Test::More;
 use Plack::Test;
 use HTTP::Request::Common;
 
 my $app = Plack::App::File->new(root => "t");
-$app = Plack::Middleware::Highlighter->wrap($app, param => "highlight");
+$app = HTML::Highlighter->wrap($app, param => "highlight");
 
 test_psgi $app, sub {
   my $cb = shift;
