@@ -17,7 +17,7 @@ sub call {
   my ($self, $env) = @_;
 
   my $res = $self->app->($env);
-  return $res unless $res->[0] == 200 and $res->[2];
+  return $res unless ref $res eq "ARRAY" and $res->[0] == 200 and $res->[2];
 
   my $h = Plack::Util::headers($res->[1]);
   return $res unless $h->get("Content-Type") =~ /html/i;
