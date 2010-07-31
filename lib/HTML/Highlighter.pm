@@ -42,14 +42,23 @@ sub call {
   my $p = HTML::Parser->new(
     api_version => 3,
     handlers => {
-      default => [ sub { $html .= $_[0] }, "text" ],
-      text => [ 
-        sub { for (@highlights) {
-                $_[0] =~ s/($_)/<span class="highlight">$1<\/span>/gi;
-              }
-              $html .= $_[0] }, "text" ],
-      end_document => [ sub { $res->[2] = [$html];
-                        $h->set('Content-Length' => length $html) }],
+      default => [
+        sub {
+          $html .= $_[0]
+        }, "text"
+      ],
+      text => [
+        sub {
+          $_[0] =~ s/($highlight)/<span class="highlight">$1<\/span>/gi;
+          $html .= $_[0]
+        }, "text"
+      ],
+      end_document => [
+        sub {
+          $res->[2] = [$html];
+          $h->set('Content-Length' => length $html)
+        }
+      ],
     }
   );
 
