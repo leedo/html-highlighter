@@ -49,7 +49,9 @@ sub call {
       ],
       text => [
         sub {
-          $_[0] =~ s/($highlight)/<span class="highlight">$1<\/span>/gi;
+          for my $highlight (@highlights) {
+            $_[0] =~ s/($highlight)/<span class="highlight">$1<\/span>/gi;
+          }
           $html .= $_[0]
         }, "text"
       ],
