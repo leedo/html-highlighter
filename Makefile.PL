@@ -7,6 +7,7 @@ all_from "lib/HTML/Highlighter.pm";
 requires "Plack" => 0;
 requires "Plack::Request" => 0;
 requires "HTML::Parser" => 0;
+requires "List::Util" => 0;
 
 test_requires "Test::More" => 0;
 test_requires "Plack::App::File" => 0;

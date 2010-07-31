@@ -6,6 +6,11 @@ use Plack::Test;
 use HTTP::Request::Common;
 
 my $file = Plack::App::File->new(root => "t");
+my $html = do   {
+  local $/; 
+  open my $highlighted, '<', 't/foo-highlighted.html';
+  <$highlighted>;
+};
 
 # get the highlight from a param
 #
@@ -16,12 +21,7 @@ test_psgi $app, sub {
 
   my $res = $cb->(GET "/foo.html?search=foo");
   is $res->code, 200;
-  {
-    local $/; 
-    open my $highlighted, '<', 't/foo-highlighted.html';
-    my $html = <$highlighted>;
-    ok $res->content eq $html;
-  }
+  ok $res->content eq $html;
 };
 
 # set highlight in callback
@@ -36,12 +36,7 @@ test_psgi $app, sub {
 
   my $res = $cb->(GET "/foo.html");
   is $res->code, 200;
-  {
-    local $/; 
-    open my $highlighted, '<', 't/foo-highlighted.html';
-    my $html = <$highlighted>;
-    ok $res->content eq $html;
-  }
+  ok $res->content eq $html;
 };
 
 # defaults
@@ -53,14 +48,19 @@ test_psgi $app, sub {
 
   my $res = $cb->(GET "/foo.html?highlight=foo");
   is $res->code, 200;
-  {
-    local $/; 
-    open my $highlighted, '<', 't/foo-highlighted.html';
-    my $html = <$highlighted>;
-    ok $res->content eq $html;
-  }
+  ok $res->content eq $html;
+
+  my $res = $cb->(GET "/foo.html?q=foo");
+  is $res->code, 200;
+  ok $res->content eq $html;
+
+  my $res = $cb->(GET "/foo.html?query=foo");
+  is $res->code, 200;
+  ok $res->content eq $html;
+
+  my $res = $cb->(GET "/foo.html?search=foo");
+  is $res->code, 200;
+  ok $res->content eq $html;
 };
-
-
 
 done_testing();
