@@ -50,15 +50,15 @@ test_psgi $app, sub {
   is $res->code, 200;
   ok $res->content eq $html;
 
-  my $res = $cb->(GET "/foo.html?q=foo");
+  $res = $cb->(GET "/foo.html?q=foo");
   is $res->code, 200;
   ok $res->content eq $html;
 
-  my $res = $cb->(GET "/foo.html?query=foo");
+  $res = $cb->(GET "/foo.html?query=foo");
   is $res->code, 200;
   ok $res->content eq $html;
 
-  my $res = $cb->(GET "/foo.html?search=foo");
+  $res = $cb->(GET "/foo.html?search=foo");
   is $res->code, 200;
   ok $res->content eq $html;
 };
