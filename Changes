@@ -1,3 +1,6 @@
+0.03  Oct 08, 2010
+  - handle all response types by using response_cb
+
 0.02  Jul 28, 2010
   - added option to set the highlight text in a callback
 

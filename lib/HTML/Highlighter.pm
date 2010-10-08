@@ -11,7 +11,7 @@ use List::Util qw/first/;
 use parent 'Plack::Middleware';
 
 use 5.008_001;
-our $VERSION = "0.02";
+our $VERSION = "0.03";
 $VERSION = eval $VERSION;
 
 sub call {
