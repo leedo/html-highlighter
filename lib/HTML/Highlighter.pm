@@ -26,8 +26,9 @@ sub call {
     if ($h->get("Content-Type") =~ /html/i) {
       $self->callback->($env) if $self->callback;
 
+      $self->param("highlight") unless $self->param;
       my $req = Plack::Request->new($env);
-      $self->param("highlight") unless $self->param;;
+
       my $highlights = do {
         if ($env->{'psgix.highlight'}) {
           $env->{'psgix.highlight'};
