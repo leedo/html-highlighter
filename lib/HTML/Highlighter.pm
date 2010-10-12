@@ -11,7 +11,7 @@ use List::Util qw/first/;
 use parent 'Plack::Middleware';
 
 use 5.008_001;
-our $VERSION = "0.03";
+our $VERSION = "0.04";
 $VERSION = eval $VERSION;
 
 sub call {
@@ -23,68 +23,66 @@ sub call {
     my $res = shift;
     my $h = Plack::Util::headers($res->[1]);
 
-    if ($h->get("Content-Type") =~ /html/i) {
-      $self->callback->($env) if $self->callback;
+    return $res unless $h->get("Content-Type") =~ /html/i;
 
-      $self->param("highlight") unless $self->param;
-      my $req = Plack::Request->new($env);
+    $self->callback->($env) if $self->callback;
 
-      my $highlights = do {
-        if ($env->{'psgix.highlight'}) {
-          $env->{'psgix.highlight'};
-        } else {
-          my $param = first {$req->parameters->{$_}} ($self->param, qw/q query search/);
-          $param ? $req->parameters->{$param} : undef;
-        }
-      };
+    my $req = Plack::Request->new($env);
+    $self->param("") unless defined $self->param;
 
-      return $res unless $highlights;
-      my @highlights = split /\s+/, $highlights;
+    my $highlights = do {
+      if ($env->{'psgix.highlight'}) {
+        $env->{'psgix.highlight'};
+      } else {
+        my $param = first {$req->parameters->{$_}} ($self->param, qw/q query search highlight/);
+        $param ? $req->parameters->{$param} : undef;
+      }
+    };
 
-      my $html;
-      my $p = HTML::Parser->new(
-        api_version => 3,
-        handlers => {
-          default => [
-            sub {
-              $html .= $_[0]
-            }, "text"
-          ],
-          text => [
-            sub {
-              for my $highlight (@highlights) {
-                $_[0] =~ s/($highlight)/<span class="highlight">$1<\/span>/gi;
-              }
-              $html .= $_[0]
-            }, "text"
-          ],
-          end_document => [
-            sub {
-              $res->[2] = [$html];
-              $h->set('Content-Length' => length $html)
+    return $res unless $highlights;
+    my @highlights = split /\s+/, $highlights;
+
+    my $html;
+    my $p = HTML::Parser->new(
+      api_version => 3,
+      handlers => {
+        default => [
+          sub {
+            $html .= $_[0]
+          }, "text"
+        ],
+        text => [
+          sub {
+            for my $highlight (@highlights) {
+              $_[0] =~ s/($highlight)/<span class="highlight">$1<\/span>/gi;
             }
-          ],
-        }
-      );
+            $html .= $_[0]
+          }, "text"
+        ],
+        end_document => [
+          sub {
+            $res->[2] = [$html];
+            $h->set('Content-Length' => length $html)
+          }
+        ],
+      }
+    );
 
-      my $done;
+    my $done;
 
-      return sub {
-        my $chunk = shift;
-        return if $done;
+    return sub {
+      my $chunk = shift;
+      return if $done;
 
-        if (defined $chunk) {
-          $p->parse($chunk);
-          return '';
-        } else {
-          $p->eof;
-          $done = 1;
-          return $html;
-        }
-      };
-    }
-
-    return $res;
+      if (defined $chunk) {
+        $p->parse($chunk);
+        return '';
+      } else {
+        $p->eof;
+        $done = 1;
+        return $html;
+      }
+    };
   });
 }
 
