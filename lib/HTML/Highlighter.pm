@@ -23,7 +23,8 @@ sub call {
     my $res = shift;
     my $h = Plack::Util::headers($res->[1]);
 
-    return $res unless $h->get("Content-Type") =~ /html/i;
+    my $type = $h->get("Content-Type");
+    return $res unless $type and $type =~ /html/i;
 
     $self->callback->($env) if $self->callback;
 
